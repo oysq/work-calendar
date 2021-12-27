@@ -3,9 +3,9 @@ new Vue({
 			data: function() {
 				return {
 					// 日历
-					currentDay: 1, // 当前天
-					currentMonth: 1, // 当前月
 					currentYear: 1970,
+					currentMonth: 1, // 当前月
+					currentDay: 1, // 当前天
 					currentWeek: 0, // 一号所在的星期
 					days: [], // 当月所有天数
 					content: {},
@@ -24,92 +24,79 @@ new Vue({
 				getSign: function() {
 					// 模拟数据
 					var sign_days = [{
-						day: '2020/6/8',
+						day: '2021/12/8',
 						is_sign: 0
 					}, {
-						day: '2020/6/9',
+						day: '2021/12/9',
 						is_sign: 0
 					}, {
-						day: '2020/6/10',
+						day: '2021/12/10',
 						is_sign: 0
 					}, {
-						day: '2020/6/11',
+						day: '2021/12/11',
 						is_sign: 0
 					}, {
-						day: '2020/6/12',
+						day: '2021/12/12',
 						is_sign: 1
 					}, {
-						day: '2020/6/13',
+						day: '2021/12/13',
 						is_sign: 1
 					}];
 					this.sign_days = sign_days;
 					this.initData(null);
 				},
 				initData: function(cur) {
-					var date;
+					var today;
 					if (cur) { // 切换上一月、下一月
-						date = new Date(cur);
+						today = new Date(cur);
 					} else {
-						date = new Date(); // 此处取本机时间，应改为服务器时间
+						today = new Date(); // 此处取本机时间，应改为服务器时间
 					}
 
-					this.currentYear = date.getFullYear(); // 当前年份
-					this.currentMonth = date.getMonth() + 1; // 当前月份
-					this.currentDay = date.getDate(); // 今日日期 几号
-					this.currentWeek = date.getDay(); // 当前月1号是星期几？ 0表示星期天
+					this.currentYear = today.getFullYear(); // 当前年份
+					this.currentMonth = today.getMonth() + 1; // 当前月份
+					this.currentDay = today.getDate(); // 今日日期 几号
+					this.currentWeek = today.getDay(); // 当前月1号是星期几？ 0表示星期天
 					console.log("current: " + this.currentYear + " " + this.currentMonth + " " + this.currentDay + " " + this.currentWeek);
 
 					// 当月第一天和最后一天
-					var firstDay = this.getFirstDay(date);
-					var lastDay = this.getLastDay(date);
-					
-					// 当前月最后一天是星期几？ 0表示星期天
-					// this.nextWeek = this.getFirstDay(date).getDay();
-					// var str = this.formatDate(this.currentYear, this.currentMonth, 1); // 2020/01/01
-					// var nextStr = new Date(date.getFullYear(), date.getMonth() + 1, 0).toLocaleDateString(); // 2020/01/01
+					var firstDay = this.getFirstDay(today);
+					var lastDay = this.getLastDay(today);
 					
 					this.days = []; // 初始化日期
+
 					// 设置上一个月 需显示 的最后几天  铺满一周
-					for (var i = this.currentWeek; i > 0; i--) {
-						var d = new Date(str);
+					for (var i = firstDay.getDay(); i > 0; i--) {
+						var d = new Date(firstDay);
 						d.setDate(d.getDate() - i);
 						var dayobject = {
 							day: d,
-							isSign: this.isVerDate(d),
-							isSigned: this.isSigned(d)
+							isSign: this.existJob(d),
+							isSigned: this.existSign(d)
 						}; // 用一个对象包装Date对象  以便为以后预定功能添加属性
 						this.days.push(dayobject); // 将日期放入data 中的days数组 供页面渲染使用
 					}
-					// 显示当前月的天数  第二个循环为 j<= 36- this.currentWeek，
-					// 因为1号是星期六的时候当前月需显示6行，如2020年8月
-					this.num = 0; //第几个月 每遇到1号加1
-					for (var j = 0; j <= 36 - this.currentWeek; j++) {
-						var d = new Date(str);
-						d.setDate(d.getDate() + j);
-						var dddd = d.getDate();
+					
+					// 设置当前月的数据
+					for (var j = firstDay.getDate(); j <= lastDay.getDate(); j++) {
+						var d = new Date(today);
+						d.setDate(j);
 						var dayobject = {
 							day: d,
-							isSign: this.isVerDate(d),
-							isSigned: this.isSigned(d)
+							isSign: this.existJob(d),
+							isSigned: this.existSign(d)
 						};
-						if (dddd == 1) {
-							this.num++
-						}
-						if (this.num == 2) {
-							break
-						}
 						this.days.push(dayobject);
 					}
-					// console.log('当前月1号是星期' + this.currentWeek)
-					// console.log('当前月最后一天是星期' + this.nextWeek)
+
 					// 设置下一个月 需显示 的最前几天铺满一周
-					for (var k = 1; k <= 6 - this.nextWeek; k++) {
-						var d = new Date(nextStr);
+					for (var k = 1; k <= 6 - lastDay.getDay(); k++) {
+						var d = new Date(lastDay);
 						d.setDate(d.getDate() + k);
 						var dayobject = {
 							day: d,
-							isSign: this.isVerDate(d),
-							isSigned: this.isSigned(d)
+							isSign: this.existJob(d),
+							isSigned: this.existSign(d)
 						}; // 用一个对象包装Date对象  以便为以后预定功能添加属性
 						this.days.push(dayobject); // 将日期放入data 中的days数组 供页面渲染使用
 					}
@@ -119,7 +106,7 @@ new Vue({
 				 * @param d
 				 * @returns {boolean}
 				 */
-				isVerDate: function(d) {
+				existJob: function(d) {
 					var signdays = [];
 					for (var i in this.sign_days) {
 						signdays.push(this.sign_days[i].day);
@@ -131,7 +118,7 @@ new Vue({
 				 * @param d
 				 * @returns {boolean}
 				 */
-				isSigned: function(d) {
+				existSign: function(d) {
 					var signdays = [];
 					for (var i in this.sign_days) {
 						if (this.sign_days[i].is_sign) {
@@ -162,15 +149,11 @@ new Vue({
 				},
 				// 返回本月第一天
 				getFirstDay: function(date) {
-					return new Date(date.getFullYear(), date.getMonth(), 0);
+					return new Date(date.getFullYear(), date.getMonth(), 1);
 				},
 				// 返回本月最后一天
 				getLastDay: function(date) {
 					return new Date(date.getFullYear(), date.getMonth() + 1, 0);
-				},
-				// 返回 类似 2020/01/01 格式的字符串
-				formatSimpleDate: function(date) {
-					return this.formatDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 				},
 				// 返回 类似 2020/01/01 格式的字符串
 				formatDate: function(year, month, day) {
@@ -184,40 +167,37 @@ new Vue({
 				 * @param index
 				 */
 				dayCheck: function(day) {
-					console.log('day',day.day)
+					console.log('day', day)
+
+					// 初始化
 					var currentPlan = {
 						title: '',
 						date: '',
 						list: []
 					};
-					currentPlan.date = day.day.toLocaleDateString().split('/')[1] + '月' + day.day.toLocaleDateString().split('/')[2] +
-						'日';
+
+					// 标题
+					currentPlan.date = day.day.toLocaleDateString().split('/')[1] + '月' + day.day.toLocaleDateString().split('/')[2] + '日';
+					
+					// 点击效果
 					for (var i in this.days) {
 						this.$set(this.days[i], 'isChecked', 0)
 					}
 					this.$set(day, 'isChecked', 1);
+					
+					// 计划
 					if (day.isSign) {
 						if (day.isSigned) {
 							currentPlan.list = [{
-								name: '重做计划1',
+								name: '17:20',
 							}, {
-								name: '重做计划2',
+								name: '18:36',
 							}, {
-								name: '重做计划3',
-							}, {
-								name: '重做计划4',
-							}, {
-								name: '重做计划5',
-							}, {
-								name: '重做计划6',
-							}, {
-								name: '重做计划7',
-							}, {
-								name: '重做计划8',
+								name: '19:20',
 							}];
-							currentPlan.title = '已完成计划×' + currentPlan.list.length;
-							currentPlan.name = '学习考点：财务成本管理《第一章 财务管理基本管理》财务成本管理';
-							currentPlan.nums = 100;
+							currentPlan.title = '打卡次数×' + currentPlan.list.length;
+							currentPlan.name = '20:37';
+							currentPlan.nums = 157;
 						} else {
 							currentPlan.title = '未完成计划'
 						}
@@ -225,6 +205,8 @@ new Vue({
 					} else {
 						currentPlan.title = '暂无任务'
 					}
+
+					// 渲染
 					this.currentPlan = currentPlan
 				}
 			}
