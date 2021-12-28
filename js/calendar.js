@@ -59,6 +59,16 @@ new Vue({
 					this.currentWeek = today.getDay(); // 当前月1号是星期几？ 0表示星期天
 					console.log("current: " + this.currentYear + " " + this.currentMonth + " " + this.currentDay + " " + this.currentWeek);
 
+					// 是否当前月
+					var isCurrentMonth = 0;
+					console.log(new Date().getFullYear())
+					console.log(new Date().getMonth()+1)
+					if (this.currentYear == (new Date().getFullYear()) && this.currentMonth == (new Date().getMonth()+1)) {
+						console.log("aaa")
+						isCurrentMonth = 1;
+					}
+					console.log(isCurrentMonth)
+
 					// 当月第一天和最后一天
 					var firstDay = this.getFirstDay(today);
 					var lastDay = this.getLastDay(today);
@@ -84,7 +94,8 @@ new Vue({
 						var dayobject = {
 							day: d,
 							isSign: this.existJob(d),
-							isSigned: this.existSign(d)
+							isSigned: this.existSign(d),
+							isChecked: (isCurrentMonth && (today.getDate() === j)) ? 1 : 0
 						};
 						this.days.push(dayobject);
 					}
@@ -199,7 +210,7 @@ new Vue({
 							currentPlan.name = '20:37';
 							currentPlan.nums = 157;
 						} else {
-							currentPlan.title = '未完成计划'
+							currentPlan.title = '未打卡'
 						}
 
 					} else {
