@@ -1,1 +1,1 @@
-# work-calendar
+# work-calendar-ui
