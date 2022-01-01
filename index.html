@@ -4,10 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
-<title>手机日历</title>   
+<title>早点下班</title>   
 
-<link rel="stylesheet" type="text/css" href="css/common.css" />
-<link rel="stylesheet" type="text/css" href="css/calendar.css" /> 
+
+<!-- 引入自定义样式 -->
+<link rel="stylesheet" type="text/css" href="css/calendar/common.css" />
+<link rel="stylesheet" type="text/css" href="css/calendar/calendar.css" />
+<!-- 引入vant -->
+<link rel="stylesheet" href="css/vant/index.css"/>
 
 </head>
 <body>
@@ -69,11 +73,37 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- 弹出层 -->
+	<van-popup v-model="show" round position="bottom" :style="{'height':'30%'}">
+		<van-cell-group inset :border="false">
+			<van-cell>
+				<van-field v-model="userName" label="用户名" placeholder="请输入用户名"/>
+			</van-cell>
+			<van-cell>
+				<van-field v-model="userPassword" label="密码" placeholder="请输入密码" type="password"/>
+			</van-cell>
+			<van-cell>
+				<van-row :style="{'text-align': 'center'}">
+				  <van-col span="4"></van-col>
+				  <van-col span="16">
+				  	<van-button type="primary" size="small" block round>登&nbsp;&nbsp;&nbsp;&nbsp;陆</van-button>
+				  </van-col>
+				  <van-col span="4"></van-col>
+				</van-row>
+			</van-cell>
+		</van-cell-group>
+	</van-popup>
+
 </div>
 
-<script src="js/vue.js" type="text/javascript" charset="utf-8"></script> 
-<script src="js/resize.js" type="text/javascript" charset="utf-8"></script>
-<script src="js/calendar.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/vue/vue.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/calendar/resize.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/vant/vant.min.js"></script>
+<script src="js/calendar/calendar.js" type="text/javascript" charset="utf-8"></script>
+
+
+
 
 </body>
 </html>
