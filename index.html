@@ -87,7 +87,15 @@
 				<van-row :style="{'text-align': 'center'}">
 				  <van-col span="4"></van-col>
 				  <van-col span="16">
-				  	<van-button type="primary" size="small" block round>登&nbsp;&nbsp;&nbsp;&nbsp;陆</van-button>
+				  	<van-button 
+				  	    @click="getAuthToken" 
+				  		color="linear-gradient(135deg, rgba(5, 201, 221, 1) 0%, rgba(23, 196, 160, 1) 100%)"
+				  		size="small" 
+				  		block 
+				  		round
+			  		>
+				  		登&nbsp;&nbsp;&nbsp;&nbsp;陆
+				  	</van-button>
 				  </van-col>
 				  <van-col span="4"></van-col>
 				</van-row>
@@ -100,6 +108,7 @@
 <script src="js/vue/vue.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/calendar/resize.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/vant/vant.min.js"></script>
+<script src="js/axios/axios.min.js"></script>
 <script src="js/calendar/calendar.js" type="text/javascript" charset="utf-8"></script>
 
 

@@ -3,6 +3,9 @@ Vue.use(vant.Field);
 Vue.use(vant.Cell);
 Vue.use(vant.CellGroup);
 
+Vue.prototype.$axios = axios
+Vue.prototype.$axios.defaults.baseURL = 'http://127.0.0.1:8080'
+
 new Vue({
 	el: '#app',
 	data: function() {
@@ -20,15 +23,34 @@ new Vue({
 			show: false,
 			// 用户信息
 			userName: "",
-			userPassword: ""
+			userPassword: "",
+			authToken: ""
 		}
 	},
 	created: function() {
-		// window.localStorage.setItem("token", "100");
-		// alert(window.localStorage.getItem('token'))
 		this.getSign();
+		this.checkAuthToken();
 	},
 	methods: {
+		/**
+		 * 用户认证相关
+		 */
+		checkAuthToken: function() {
+			this.authToken = window.localStorage.getItem('authToken')
+			if (!this.authToken) {
+				this.show = true
+			}
+		},
+		getAuthToken: function() {
+			// this.$axios.post('/test/tt',{user:123,pwd:123}).then(res => {
+			//    console.log(res.data)
+			// })
+			this.$axios.get('/test/abc').then(res => {
+			   console.log(res.data)
+			})
+			// window.localStorage.setItem("authToken", this.userName + "-" + this.userPassword);
+			// this.show = false
+		},
 		/**
 		 * 获取签到日期
 		 */
@@ -55,7 +77,6 @@ new Vue({
 			}];
 			this.sign_days = sign_days;
 			this.initData(null);
-			this.show = true
 		},
 		initData: function(cur) {
 			var today;
