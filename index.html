@@ -75,7 +75,7 @@
 	</div>
 
 	<!-- 弹出层 -->
-	<van-popup v-model="show" round position="bottom" :style="{'height':'30%'}">
+	<van-popup v-model="show" round position="bottom" :style="{'height':'30%'}" :close-on-click-overlay="false">
 		<van-cell-group inset :border="false">
 			<van-cell>
 				<van-field v-model="userName" label="用户名" placeholder="请输入用户名"/>
@@ -88,7 +88,7 @@
 				  <van-col span="4"></van-col>
 				  <van-col span="16">
 				  	<van-button 
-				  	    @click="getAuthToken" 
+				  	    @click="getToken" 
 				  		color="linear-gradient(135deg, rgba(5, 201, 221, 1) 0%, rgba(23, 196, 160, 1) 100%)"
 				  		size="small" 
 				  		block 

@@ -4,7 +4,10 @@ Vue.use(vant.Cell);
 Vue.use(vant.CellGroup);
 
 Vue.prototype.$axios = axios
-Vue.prototype.$axios.defaults.baseURL = 'http://127.0.0.1:8080'
+Vue.prototype.$axios.defaults.baseURL = 'http://127.0.0.1:8080/calendar-ms'
+
+Vue.prototype.$toast = vant.Toast
+Vue.prototype.$toast.setDefaultOptions({ duration: 2000 });
 
 new Vue({
 	el: '#app',
@@ -29,25 +32,52 @@ new Vue({
 	},
 	created: function() {
 		this.getSign();
-		this.checkAuthToken();
+		this.checkToken();
 	},
 	methods: {
 		/**
 		 * 用户认证相关
 		 */
-		checkAuthToken: function() {
+		checkToken: function() {
 			this.authToken = window.localStorage.getItem('authToken')
 			if (!this.authToken) {
+				this.$toast.fail("需要登录一下哦");
 				this.show = true
+				return
 			}
+			this.$axios.post('/user/checkToken',
+					{
+						token: this.authToken
+					}
+				).then(res => {
+			    	if(res.data.status == 1) {
+				   	    // do nothing
+					} else {
+						this.$toast.fail("有点久了哦，重新登录一下昂");
+				        this.show = true
+					    return
+					}
+				}).catch(function (error) {
+					console.log(error);
+				    alert(error);
+				});
 		},
-		getAuthToken: function() {
-			// this.$axios.post('/test/tt',{user:123,pwd:123}).then(res => {
-			//    console.log(res.data)
-			// })
-			this.$axios.get('/test/abc').then(res => {
-			   console.log(res.data)
-			})
+		getToken: function() {
+			this.$axios.post('/user/checkUserExists',
+					{
+						userName: this.userName,
+						password:this.userPassword
+					}
+				).then(res => {
+			    	if(res.data.status == 1) {
+				   	    console.log("==> " + res.data.body.type)
+					} else {
+						this.$toast.fail(res.data.msg);
+					}
+				}).catch(function (error) {
+					console.log(error);
+				    alert(error);
+				});
 			// window.localStorage.setItem("authToken", this.userName + "-" + this.userPassword);
 			// this.show = false
 		},
@@ -252,5 +282,6 @@ new Vue({
 			// 渲染
 			this.currentPlan = currentPlan
 		}
+
 	}
 });
