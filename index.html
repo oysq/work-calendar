@@ -16,9 +16,13 @@
 </head>
 <body>
 <div id="app" class="vueBox" v-cloak>
+
+	<!-- 背景 -->
 	<div class="plan-finish-header">
 		<div class="plan-finish-bg"></div>
 	</div>
+
+	<!-- 日历 -->
 	<div class="plan-finish-calendar mtop1">
 		<div class="calendar">
 			<!-- 年份 月份 -->
@@ -55,6 +59,20 @@
 				</li>
 			</ul>
 		</div>
+
+		<div class="punch" :style="{'margin-top': '30px'}">
+			<van-grid :border="false" :column-num="3">
+			  <van-grid-item>
+			  </van-grid-item>
+			  <van-grid-item @click="punchClick">
+			    <van-image src="img/touch1.png" />
+			  </van-grid-item>
+			  <van-grid-item>
+			  </van-grid-item>
+			</van-grid>
+		</div>
+
+
 		<div class="plan-calendar-info" v-show="currentPlan.date">
 			<div class="calendar-info-date"> 
 				<span v-text="currentPlan.date"></span>
@@ -74,8 +92,8 @@
 		</div>
 	</div>
 
-	<!-- 弹出层 -->
-	<van-popup v-model="show" round position="bottom" :style="{'height':'30%'}" :close-on-click-overlay="false">
+	<!-- 登录弹出层 -->
+	<van-popup v-model="showAuthPopup" round position="bottom" :style="{'height':'30%'}" :close-on-click-overlay="false">
 		<van-cell-group inset :border="false">
 			<van-cell>
 				<van-field v-model="userName" label="用户名" placeholder="请输入用户名"/>
@@ -102,6 +120,24 @@
 			</van-cell>
 		</van-cell-group>
 	</van-popup>
+
+	<!-- 打卡弹出层 -->
+	<van-popup v-model="showPunchPopup" round position="bottom" :style="{'height':'50%'}">
+		<van-datetime-picker
+		  v-model="punchTimeSelect"
+		  type="time"
+		  title="选择时间"
+		  @confirm="punchConfirm"
+		  @cancel="punchCancel"
+		/>
+	</van-popup>
+
+	<!-- 加载动画 -->
+	<van-overlay :show="lodingStatus">
+		<div class="loading-wrapper">
+		    <van-loading size="48"/>
+		</div>
+	</van-overlay>
 
 </div>
 
