@@ -7,92 +7,65 @@
 <title>早点下班</title>   
 
 
-<!-- 引入自定义样式 -->
-<link rel="stylesheet" type="text/css" href="css/calendar/common.css" />
-<link rel="stylesheet" type="text/css" href="css/calendar/calendar.css" />
 <!-- 引入vant -->
+<link rel="stylesheet" href="css/calendar/calendar.css"/>
 <link rel="stylesheet" href="css/vant/index.css"/>
 
 </head>
 <body>
-<div id="app" class="vueBox" v-cloak>
-
-	<!-- 背景 -->
-	<div class="plan-finish-header">
-		<div class="plan-finish-bg"></div>
-	</div>
+<div id="app" :style="{'width':'100%'}">
 
 	<!-- 日历 -->
-	<div class="plan-finish-calendar mtop1">
-		<div class="calendar">
-			<!-- 年份 月份 -->
-			<ul class="month bottom-line">
-				<!--点击会触发pickpre函数，重新刷新当前日期 -->
-				<li class="arrow" @click="pickPre(currentYear,currentMonth)">
-					<i class="mintuifont mintui-arrowright arrowleft"></i>
-				</li>
-				<li class="year-month">
-					<span v-text="currentYear+'年'+currentMonth+'月'"></span>
-				</li>
-				<li class="arrow" @click="pickNext(currentYear,currentMonth)">
-					<i class="mintuifont mintui-arrowright"></i>
-				</li>
-			</ul>
-			<!-- 星期 -->
-			<ul class="weekdays">
-				<li>日</li>
-				<li>一</li>
-				<li>二</li>
-				<li>三</li>
-				<li>四</li>
-				<li>五</li>
-				<li>六</li>
-			</ul>
-			<!-- 日期 -->
-			<ul class="days bottom-line">
-				<li v-for="day in days" @click="dayCheck(day)">
-					<!--本月已签到日期-->
-					<span :day="day.day" :class="['day-li',day.isChecked?'day-checked':'']">
-						<span :class="['day-span',day.isSign?'day-sign':'',day.day.getMonth()+1 !== currentMonth?'other':'',day.isSigned?'day-signed':'']"
-						 v-text="day.day.getDate()"></span>
-					</span>
-				</li>
-			</ul>
-		</div>
 
+	<div>
+		<van-calendar
+			:show-title="false"
+			:poppable="false"
+			:show-confirm="false"
+			:row-height="52"
+			:style="{ height: '450px' }"
+			color="linear-gradient(135deg, rgba(5, 201, 221, 1) 0%, rgba(23, 196, 160, 1) 100%)"
+		/>
+	</div>
+	
+	<div>
+		<!-- 分割线 -->
+		<van-divider :style="{'margin':'0px'}"/>
+	</div>
+	
+
+	<div :style="{'background-color': '#FFF'}">
 		<!-- 打卡按钮 -->
-		<div class="punch" :style="{'margin-top': '30px'}">
-			<van-grid :border="false" :column-num="3" :gutter="15" :style="{'margin-top': '7px'}">
-			  <van-grid-item @click="punchClick">
-			  	<van-image src="img/morning.png"/>
-			  </van-grid-item>
-			  <van-grid-item @click="punchClick">
-			    <van-image src="img/check.png"/>
-			  </van-grid-item>
-			  <van-grid-item>
-			  	<van-image src="img/history.png" />
-			  </van-grid-item>
-			</van-grid>
-		</div>
+		<van-grid :border="false" :column-num="3" :gutter="10" :clickable="true" :square="true" :center="true">
+		  <van-grid-item>
+		  	<van-image src="img/morning.png"/>
+		  </van-grid-item>
+		  <van-grid-item @click="punchClick">
+		    <van-image src="img/check.png"/>
+		  </van-grid-item>
+		  <van-grid-item @click="clickReport">
+		  	<van-image src="img/history.png" />
+		  </van-grid-item>
+		</van-grid>
+	</div>
 
+	<div>
+		<!-- 分割线 -->
+		<van-divider :style="{'margin':'0px'}"/>
+	</div>
 
-		<div class="plan-calendar-info" v-show="currentPlan.date">
-			<div class="calendar-info-date"> 
-				<span v-text="currentPlan.date"></span>
-			</div>
-			<div class="calendar-info-title">
-				<span v-text="currentPlan.title"></span>
-			</div>
-			<ul class="calendar-info-list">
-				<li v-for="item in currentPlan.list">
-					<span v-text="item.name"></span>
-				</li>
-			</ul>
-			<div class="calendar-info-text" v-if="currentPlan.nums">
-				<p v-text="currentPlan.name"></p>
-				<p class="calendar-info-nums" v-text="'加班时长：'+ currentPlan.nums+'分钟'"></p>
-			</div>
-		</div>
+	<div>
+		<van-steps direction="vertical" :active="2">
+		  <van-step>
+		    <h3>【开始时间】12:40</h3>
+		  </van-step>
+		  <van-step>
+		    <h3>【结束时间】12:40</h3>
+		  </van-step>
+		  <van-step>
+		    <h3>【加班结算】时长：1小时  加班费：￥30</h3>
+		  </van-step>
+		</van-steps>
 	</div>
 
 	<!-- 登录弹出层 -->
@@ -144,8 +117,8 @@
 
 </div>
 
-<script src="js/vue/vue.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/calendar/resize.js" type="text/javascript" charset="utf-8"></script>
+<script src="js/vue/vue.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/vant/vant.min.js"></script>
 <script src="js/axios/axios.min.js"></script>
 <script src="js/calendar/calendar.js" type="text/javascript" charset="utf-8"></script>
