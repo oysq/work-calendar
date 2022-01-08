@@ -60,14 +60,17 @@
 			</ul>
 		</div>
 
+		<!-- 打卡按钮 -->
 		<div class="punch" :style="{'margin-top': '30px'}">
-			<van-grid :border="false" :column-num="3">
-			  <van-grid-item>
+			<van-grid :border="false" :column-num="3" :gutter="15" :style="{'margin-top': '7px'}">
+			  <van-grid-item @click="punchClick">
+			  	<van-image src="img/morning.png"/>
 			  </van-grid-item>
 			  <van-grid-item @click="punchClick">
-			    <van-image src="img/touch1.png" />
+			    <van-image src="img/check.png"/>
 			  </van-grid-item>
 			  <van-grid-item>
+			  	<van-image src="img/history.png" />
 			  </van-grid-item>
 			</van-grid>
 		</div>
@@ -126,7 +129,7 @@
 		<van-datetime-picker
 		  v-model="punchTimeSelect"
 		  type="time"
-		  title="选择时间"
+		  title="下班时间"
 		  @confirm="punchConfirm"
 		  @cancel="punchCancel"
 		/>

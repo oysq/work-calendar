@@ -9,7 +9,8 @@ Vue.use(vant.Divider);
 
 
 Vue.prototype.$axios = axios
-Vue.prototype.$axios.defaults.baseURL = 'http://127.0.0.1:8080/calendar-ms'
+// Vue.prototype.$axios.defaults.baseURL = 'http://81.71.39.253:80/calendar-ms'
+Vue.prototype.$axios.defaults.baseURL = 'http://127.0.0.1:80/calendar-ms'
 
 // 吐司
 Vue.prototype.$toast = vant.Toast
@@ -51,11 +52,6 @@ new Vue({
 		}
 	},
 	created: function() {
-
-		var now = new Date();
-		this.punchTimeSelect = now.getHours() + ":" + now.getMinutes();
-		this.punchTimeResult = this.punchTimeSelect;
-
 		this.getSign();
 		this.checkToken();
 	},
@@ -381,14 +377,17 @@ new Vue({
 		 * 打卡
 		 */
 		punchClick: function() {
+			var now = new Date();
+			this.punchTimeSelect = now.getHours() + ":" + now.getMinutes();
 			this.showPunchPopup = true;
 		},
 		punchCancel: function() {
 			this.showPunchPopup = false;
 		},
 		punchConfirm: function() {
-			this.showPunchPopup = false;
 			this.punchTimeResult = this.punchTimeSelect;
+			this.showPunchPopup = false;
+			console.log("selectTime: " + this.punchTimeResult);
 		},
 		/**
 		 * 弹窗
