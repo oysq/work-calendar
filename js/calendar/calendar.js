@@ -30,13 +30,27 @@ new Vue({
 			// 登录弹窗
 			showAuthPopup: false,
 			// 用户信息
-			userName: "",
-			userPassword: "",
-			authToken: "",
+			user: {
+				name: "",
+				password: "",
+				id: "",
+				token: ""
+			},
 			// 打卡弹窗
-			showPunchPopup: false,
-			punchTimeSelect: "",
-			punchTimeResult: ""
+			punchPopup: {
+				show: false,
+				title: "",
+				timeSelect: "",
+				timeConfirm: ""
+			},
+			// 日历
+			calendar: {
+				selectDate: new Date()
+			},
+			// 当月打卡记录
+			punchRecord: {
+
+			}
 		}
 	},
 	created() {
@@ -48,8 +62,8 @@ new Vue({
 		 */
 		checkToken() {
 			this.showLoding();
-			this.authToken = window.localStorage.getItem('authToken')
-			if (!this.authToken) {
+			this.user.token = window.localStorage.getItem('authToken')
+			if (!this.user.token) {
 				this.hideLoding();
 				this.$toast.fail("需要登录一下哦");
 				this.showAuthPopup = true
@@ -57,19 +71,21 @@ new Vue({
 			}
 			this.$axios.post('/user/checkToken', 
 					{
-						token: this.authToken
+						token: this.user.token
 					}
 				).then(res => {
 					this.hideLoding();
 			    	if(res.data.status == 1) {
-				   	    this.$notify({ type: 'success', message: "身份验证通过，欢迎 " + res.data.body.name});
+			    		this.user.id = res.data.body.userId
+				   	    this.$notify({ type: 'success', message: "身份验证通过，欢迎 " + res.data.body.userName});
+				   	    // 加载数据
+				   	    this.queryCalendarList(this.calendar.selectDate);
 					} else {
 						this.$toast.fail("有点久了哦，重新登录一下昂");
 				        this.showAuthPopup = true
 					    return
 					}
 				}).catch(function (error) {
-					this.hideLoding();
 					console.log(error);
 				    alert(error);
 				});
@@ -79,7 +95,7 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/user/checkUserExists',
 					{
-						userName: this.userName
+						userName: this.user.name
 					}
 				).then(res => {
 					this.hideLoding();
@@ -104,8 +120,8 @@ new Vue({
 						    	// 创建用户
 					   	    	this.$axios.post('/user/insertUser',
 									{
-										userName: this.userName,
-										password: this.userPassword
+										userName: this.user.name,
+										password: this.user.password
 									}
 								).then(res => {
 									if(res.data.status == 1) {
@@ -117,7 +133,6 @@ new Vue({
 										this.$toast.fail(res.data.msg);
 									}
 								}).catch(function (error) {
-									this.hideLoding();
 									console.log(error);
 								    alert(error);
 								});
@@ -134,7 +149,6 @@ new Vue({
 						this.$toast.fail(res.data.msg);
 					}
 				}).catch(function (error) {
-					this.hideLoding();
 					console.log(error);
 				    alert(error);
 				});
@@ -143,19 +157,21 @@ new Vue({
 		refreshToken() {
 			this.$axios.post('/user/refreshToken',
 				{
-					userName: this.userName,
-					password: this.userPassword
+					userName: this.user.name,
+					password: this.user.password
 				}
 			).then(res => {
 				if(res.data.status == 1) {
+					this.user.id = res.data.body.userId
 					window.localStorage.setItem("authToken", res.data.body.token);
 					this.showAuthPopup = false;
-					this.$notify({ type: 'success', message: "身份验证通过，欢迎 " + this.userName});
+					this.$notify({ type: 'success', message: "身份验证通过，欢迎 " + res.data.body.userName});
+					// 加载数据
+				   	this.queryCalendarList(this.calendar.selectDate);
 				} else {
 					this.$toast.fail(res.data.msg);
 				}
 			}).catch(function (error) {
-				this.hideLoding();
 				console.log(error);
 			    alert(error);
 			});
@@ -163,31 +179,57 @@ new Vue({
 		/**
 		 * 日历
 		 */
-		selectCalendar(selectDate) {
-			console.log(selectDate);
+		queryCalendarList(date) {
+			this.showLoding();
+			this.$axios.post('/punchRecord/selectRecord',
+				{
+					userId: this.user.id,
+					startDate: this.formatDate(this.getFirstDayOfMonth(date), "/"),
+					endDate: this.formatDate(this.getLastDayOfMonth(date), "/")
+				}
+			).then(res => {
+				this.hideLoding();
+				if(res.data.status == 1) {
+					// TODO 遍历转为0-31的数组
+					
+					this.punchRecord[this.formatMonth(date, "-")] = res.data.body;
+					console.log(this.punchRecord)
+				} else {
+					this.$toast.fail(res.data.msg);
+				}
+			}).catch(function (error) {
+				console.log(error);
+			    alert(error);
+			});
+		},
+		selectCalendar(clickDate) {
+			this.calendar.selectDate = clickDate
+			console.log("clickDate: " + clickDate);
 		},
 		/**
 		 * 打卡
 		 */
 		punchClick() {
+			this.punchPopup.title = this.formatDate(this.calendar.selectDate, "-");
+			// TODO 有打卡的要切换到对应的时间
 			var now = new Date();
-			this.punchTimeSelect = now.getHours() + ":" + now.getMinutes();
-			this.showPunchPopup = true;
+			this.punchPopup.timeSelect = now.getHours() + ":" + now.getMinutes();
+			this.punchPopup.show = true;
 		},
 		punchCancel() {
-			this.showPunchPopup = false;
+			this.punchPopup.show = false;
 		},
 		punchConfirm() {
-			this.punchTimeResult = this.punchTimeSelect;
-			this.showPunchPopup = false;
-			console.log("selectTime: " + this.punchTimeResult);
+			this.punchPopup.timeConfirm = this.punchPopup.timeSelect;
+			this.punchPopup.show = false;
+			console.log("timeConfirm: " + this.punchPopup.timeConfirm);
 		},
 		/**
 		 * 报表
 		 */
-		 clickReport() {
-		 	this.$toast.fail("报表功能开发中哦~~~");
-		 },
+		clickReport() {
+			this.$toast.fail("报表功能开发中哦~~~");
+		},
 		/**
 		 * 弹窗
 		 */
@@ -196,7 +238,47 @@ new Vue({
 		},
 		hideLoding() {
 			this.lodingStatus = false;
+		},
+		/**
+		 * 工具
+		 */
+		// 返回某月第一天
+		getFirstDayOfMonth: function(date) {
+			return new Date(date.getFullYear(), date.getMonth(), 1);
+		},
+		// 返回某月最后一天
+		getLastDayOfMonth: function(date) {
+			return new Date(date.getFullYear(), date.getMonth() + 1, 0);
+		},
+		// 返回 类似 2020/01/01 格式的字符串
+		formatDate(date, ch) {
+
+			var year = date.getFullYear();
+			var month = (date.getMonth() + 1);
+			var day = date.getDate();
+
+			month < 10 && (month = '0' + month);
+			day < 10 && (day = '0' + day);
+
+			return (year + ch + month + ch + day);
+		},
+		// 返回 类似 2020/01 格式的字符串
+		formatMonth(date, ch) {
+
+			var year = date.getFullYear();
+			var month = (date.getMonth() + 1);
+
+			month < 10 && (month = '0' + month);
+
+			return (year + ch + month);
 		}
 
 	}
 });
+
+
+
+
+
+
+
