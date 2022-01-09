@@ -23,7 +23,7 @@ Vue.prototype.$dialog = vant.Dialog
 
 new Vue({
 	el: '#app',
-	data: function() {
+	data() {
 		return {
 			// 遮罩
 			lodingStatus: false,
@@ -39,14 +39,14 @@ new Vue({
 			punchTimeResult: ""
 		}
 	},
-	created: function() {
+	created() {
 		this.checkToken();
 	},
 	methods: {
 		/**
 		 * 用户认证相关
 		 */
-		checkToken: function() {
+		checkToken() {
 			this.showLoding();
 			this.authToken = window.localStorage.getItem('authToken')
 			if (!this.authToken) {
@@ -74,7 +74,8 @@ new Vue({
 				    alert(error);
 				});
 		},
-		getToken: function() {
+		// 获取token
+		getToken() {
 			this.showLoding();
 			this.$axios.post('/user/checkUserExists',
 					{
@@ -139,7 +140,7 @@ new Vue({
 				});
 		},
 		// 刷新token
-		refreshToken: function() {
+		refreshToken() {
 			this.$axios.post('/user/refreshToken',
 				{
 					userName: this.userName,
@@ -160,17 +161,23 @@ new Vue({
 			});
 		},
 		/**
+		 * 日历
+		 */
+		selectCalendar(selectDate) {
+			console.log(selectDate);
+		},
+		/**
 		 * 打卡
 		 */
-		punchClick: function() {
+		punchClick() {
 			var now = new Date();
 			this.punchTimeSelect = now.getHours() + ":" + now.getMinutes();
 			this.showPunchPopup = true;
 		},
-		punchCancel: function() {
+		punchCancel() {
 			this.showPunchPopup = false;
 		},
-		punchConfirm: function() {
+		punchConfirm() {
 			this.punchTimeResult = this.punchTimeSelect;
 			this.showPunchPopup = false;
 			console.log("selectTime: " + this.punchTimeResult);
@@ -178,16 +185,16 @@ new Vue({
 		/**
 		 * 报表
 		 */
-		 clickReport: function() {
+		 clickReport() {
 		 	this.$toast.fail("报表功能开发中哦~~~");
 		 },
 		/**
 		 * 弹窗
 		 */
-		showLoding: function() {
+		showLoding() {
 			this.lodingStatus = true;
 		},
-		hideLoding: function() {
+		hideLoding() {
 			this.lodingStatus = false;
 		}
 
