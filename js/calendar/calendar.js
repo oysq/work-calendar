@@ -179,6 +179,7 @@ new Vue({
 		/**
 		 * 日历
 		 */
+		// 获取打卡数据
 		queryCalendarList(date) {
 			this.showLoding();
 			this.$axios.post('/punchRecord/selectRecord',
@@ -191,9 +192,13 @@ new Vue({
 				this.hideLoding();
 				if(res.data.status == 1) {
 					// TODO 遍历转为0-31的数组
+					for(const index in res.data.body) {
+						const item = res.data.body[index];
+						this.punchRecord[item.punchDate] = item;
+					}
 					
-					this.punchRecord[this.formatMonth(date, "-")] = res.data.body;
 					console.log(this.punchRecord)
+
 				} else {
 					this.$toast.fail(res.data.msg);
 				}
@@ -202,9 +207,27 @@ new Vue({
 			    alert(error);
 			});
 		},
+		// 数据渲染
+		formatter(day) {
+
+			const formatDay = this.formatDate(day.date, "/");
+			if(formatDay in this.punchRecord) {
+				if(!this.isBlank(this.punchRecord[formatDay]['endTime'])) {
+					day.bottomInfo = this.punchRecord[formatDay]['endTime'].split(" ")[1].substring(0, 5);
+				}
+			}
+
+			return day;
+
+		},
+		// 某个月进入可视区域
+		monthShow(obj) {
+			console.log("进入可视区域: " + obj.date)
+			this.queryCalendarList(obj.date);
+		},
 		selectCalendar(clickDate) {
 			this.calendar.selectDate = clickDate
-			console.log("clickDate: " + clickDate);
+			console.log("点击日期: " + clickDate);
 		},
 		/**
 		 * 打卡
@@ -271,6 +294,14 @@ new Vue({
 			month < 10 && (month = '0' + month);
 
 			return (year + ch + month);
+		},
+		// 判断是否为空
+		isBlank(obj) {
+		    if(typeof obj == "undefined" || obj == null || obj == ""){
+		        return true;
+		    }else{
+		        return false;
+		    }
 		}
 
 	}

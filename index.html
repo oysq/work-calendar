@@ -26,7 +26,10 @@
 			:style="{ height: '450px' }"
 			color="linear-gradient(135deg, rgba(5, 201, 221, 1) 0%, rgba(23, 196, 160, 1) 100%)"
 			:default-date="calendar.selectDate"
+			type="single"
+			:formatter="formatter"
 			@select="selectCalendar"
+			@month-show="monthShow"
 		/>
 	</div>
 	
