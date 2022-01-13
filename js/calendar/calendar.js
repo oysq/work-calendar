@@ -44,13 +44,12 @@ new Vue({
 				timeConfirm: ""
 			},
 			// 日历
+			showCalendar: false,
 			calendar: {
 				selectDate: new Date()
 			},
 			// 当月打卡记录
-			punchRecord: {
-
-			}
+			punchRecord: {}
 		}
 	},
 	created() {
@@ -184,9 +183,7 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/punchRecord/selectRecord',
 				{
-					userId: this.user.id,
-					startDate: this.formatDate(this.getFirstDayOfMonth(date), "/"),
-					endDate: this.formatDate(this.getLastDayOfMonth(date), "/")
+					userId: this.user.id
 				}
 			).then(res => {
 				this.hideLoding();
@@ -196,9 +193,10 @@ new Vue({
 						const item = res.data.body[index];
 						this.punchRecord[item.punchDate] = item;
 					}
-					
-					console.log(this.punchRecord)
-
+					console.log("=== punchRecord ===");
+					console.log(this.punchRecord);
+					// 开始加载渲染数据
+					this.showCalendar = true;
 				} else {
 					this.$toast.fail(res.data.msg);
 				}
@@ -207,7 +205,7 @@ new Vue({
 			    alert(error);
 			});
 		},
-		// 数据渲染
+		// 数据渲染规则
 		formatter(day) {
 
 			const formatDay = this.formatDate(day.date, "/");
@@ -222,12 +220,11 @@ new Vue({
 		},
 		// 某个月进入可视区域
 		monthShow(obj) {
-			console.log("进入可视区域: " + obj.date)
-			this.queryCalendarList(obj.date);
+			console.log("进入可视区域: " + this.formatDate(obj.date, "-"))
 		},
 		selectCalendar(clickDate) {
 			this.calendar.selectDate = clickDate
-			console.log("点击日期: " + clickDate);
+			console.log("点击日期: " + this.formatDate(clickDate, "-"));
 		},
 		/**
 		 * 打卡
