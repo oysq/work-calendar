@@ -45,6 +45,7 @@ new Vue({
 			},
 			// 日历
 			showCalendar: false,
+			minDate: new Date("2021", 5, 1),
 			calendar: {
 				selectDate: new Date()
 			},
@@ -222,6 +223,7 @@ new Vue({
 		monthShow(obj) {
 			console.log("进入可视区域: " + this.formatDate(obj.date, "-"))
 		},
+		// 点击某个日期
 		selectCalendar(clickDate) {
 			this.calendar.selectDate = clickDate
 			console.log("点击日期: " + this.formatDate(clickDate, "-"));
