@@ -45,7 +45,7 @@ new Vue({
 			},
 			// 日历
 			showCalendar: false,
-			minDate: new Date("2021", 5, 1),
+			minDate: new Date("2021/06/01"),
 			calendar: {
 				selectDate: new Date()
 			},
@@ -206,13 +206,23 @@ new Vue({
 			    alert(error);
 			});
 		},
+		// 查找结果集的数据
+		findRecord(day) {
+
+			const formatDay = this.formatDate(day, "/");
+			if(formatDay in this.punchRecord) {
+				return this.punchRecord[formatDay];
+			}
+			return null;
+			
+		},
 		// 数据渲染规则
 		formatter(day) {
 
-			const formatDay = this.formatDate(day.date, "/");
-			if(formatDay in this.punchRecord) {
-				if(!this.isBlank(this.punchRecord[formatDay]['endTime'])) {
-					day.bottomInfo = this.punchRecord[formatDay]['endTime'].split(" ")[1].substring(0, 5);
+			const record = this.findRecord(day.date);
+			if(record) {
+				if(record['endTime']) {
+					day.bottomInfo = record['endTime'].split(" ")[1].substring(0, 5);
 				}
 			}
 
@@ -234,17 +244,47 @@ new Vue({
 		punchClick() {
 			this.punchPopup.title = this.formatDate(this.calendar.selectDate, "-");
 			// TODO 有打卡的要切换到对应的时间
-			var now = new Date();
-			this.punchPopup.timeSelect = now.getHours() + ":" + now.getMinutes();
+			// 调整当前时间选择器的时间
+			const record = this.findRecord(this.calendar.selectDate);
+			if(record) {
+				if(record['endTime']) {
+					this.punchPopup.timeSelect = record['endTime'].split(" ")[1].substring(0, 5);
+				}
+			} else {
+				var now = new Date();
+				this.punchPopup.timeSelect = now.getHours() + ":" + now.getMinutes();
+			}
 			this.punchPopup.show = true;
 		},
 		punchCancel() {
 			this.punchPopup.show = false;
 		},
 		punchConfirm() {
+
 			this.punchPopup.timeConfirm = this.punchPopup.timeSelect;
-			this.punchPopup.show = false;
 			console.log("timeConfirm: " + this.punchPopup.timeConfirm);
+
+			this.punchPopup.show = false;
+			
+			this.showLoding();
+			this.$axios.post('/punchRecord/updateEndTime',
+				{
+					userId: this.user.id,
+					punchDate: this.formatDate(this.calendar.selectDate, "/"),
+					endTime: this.formatDate(this.calendar.selectDate, "/") + " " + this.punchPopup.timeConfirm + ":00"
+				}
+			).then(res => {
+				this.hideLoding();
+				if(res.data.status == 1) {
+					this.$notify({ type: 'success', message: "打卡成功"});
+					setTimeout("window.location.reload()", 1000);
+				} else {
+					this.$toast.fail(res.data.msg);
+				}
+			}).catch(function (error) {
+				console.log(error);
+			    alert(error);
+			});
 		},
 		/**
 		 * 报表

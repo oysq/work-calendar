@@ -31,7 +31,11 @@
 			:formatter="formatter"
 			@select="selectCalendar"
 			@month-show="monthShow"
-		/>
+		>
+			<template v-slot:bottom-info="day">
+				<div :style="{'color':'#04abc5'}">{{ day.bottomInfo }}</div>
+			</template>
+		</van-calendar>
 	</div>
 	
 	<div>
