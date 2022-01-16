@@ -70,6 +70,10 @@ new Vue({
 						code: "start"
 					},
 					{
+						name: '取消打卡',
+						code: "delete"
+					},
+					{
 						name: '节假倍率',
 						code: "rate"
 					},
@@ -114,24 +118,6 @@ new Vue({
 	},
 	created() {
 		this.checkToken();
-		setTimeout(() => {
-
-			if (navigator.userAgent.toLocaleLowerCase().includes('iphone')) {
-				// @ts-ignore
-				this.intervalFlag = setInterval(() => {
-					document.querySelector('body').scrollTop = 0;
-				}, 200);
-			}
-	      
-			if (navigator.userAgent.toLowerCase().includes('iphone')) {
-				if(document.querySelector('app-confirm-loan')) {
-					document.querySelector('app-confirm-loan').addEventListener('touchmove', (e) => {
-						e.preventDefault();
-					});
-				}
-			}
-
-	    }, 100);
 	},
 	methods: {
 		/**
@@ -262,9 +248,12 @@ new Vue({
 		queryCalendarList(date) {
 			this.showLoding();
 			this.$axios.post('/punchRecord/selectRecord',
+				{},
 				{
-					userId: this.user.id
-				}
+			        headers: {
+			            'C-TOKEN': this.user.token
+			        }
+			    }
 			).then(res => {
 				this.hideLoding();
 				if(res.data.status == 1) {
@@ -370,10 +359,14 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/punchRecord/updateEndTime',
 				{
-					userId: this.user.id,
 					punchDate: this.formatDate(punchDate, "/"),
 					endTime: this.formatDate(this.calendar.selectDate, "/") + " " + this.punchPopup.timeConfirm + ":00"
-				}
+				},
+				{
+			        headers: {
+			            'C-TOKEN': this.user.token
+			        }
+			    }
 			).then(res => {
 				this.hideLoding();
 				if(res.data.status == 1) {
@@ -400,6 +393,11 @@ new Vue({
 			// 开始时间
 			if(item.code == "start") {
 				this.startConfClick();
+			}
+
+			// 取消打卡
+			if(item.code == "delete") {
+				this.deletePunch();
 			}
 
 			// 倍率
@@ -445,10 +443,14 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/punchRecord/updateStartTime',
 				{
-					userId: this.user.id,
 					punchDate: this.formatDate(punchDate, "/"),
 					startTime: this.formatDate(this.calendar.selectDate, "/") + " " + this.startConf.timeConfirm + ":00"
-				}
+				},
+				{
+			        headers: {
+			            'C-TOKEN': this.user.token
+			        }
+			    }
 			).then(res => {
 				this.hideLoding();
 				if(res.data.status == 1) {
@@ -460,6 +462,54 @@ new Vue({
 			}).catch(function (error) {
 				console.log(error);
 			    alert(error);
+			});
+		},
+		/**
+		 * 取消打卡
+		 */
+		deletePunch() {
+
+			// 是否有记录
+			const record = this.findRecord(this.calendar.selectDate);
+			if(!record) {
+				this.$toast.fail("当天没有打卡记录哦~~");
+				return;
+			}
+
+			// 提醒弹窗
+   	    	this.$dialog.confirm({
+			  title: '再次确认',
+			  message: '即将取消【' + this.formatDate(this.calendar.selectDate, "-") + '】的打卡，要确认一下日期哦~~',
+			  confirmButtonText: '确认',
+			  cancelButtonText: '取消操作'
+			})
+			.then(() => {
+		    	// on confirm
+	   	    	this.$axios.post('/punchRecord/delete',
+					{
+						punchDate: this.formatDate(this.calendar.selectDate, "/"),
+					},
+					{
+				        headers: {
+				            'C-TOKEN': this.user.token
+				        }
+				    }
+				).then(res => {
+					this.hideLoding();
+					if(res.data.status == 1) {
+						this.$notify({ type: 'success', message: "调整成功"});
+						setTimeout("window.location.reload()", 1000);
+					} else {
+						this.$toast.fail(res.data.msg);
+					}
+				}).catch(function (error) {
+					console.log(error);
+				    alert(error);
+				});
+
+			})
+			.catch(() => {
+		    	// on cancel：do nothing
 			});
 		},
 		/**
@@ -492,10 +542,14 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/punchRecord/updateMultiplyRate',
 				{
-					userId: this.user.id,
 					punchDate: this.formatDate(this.calendar.selectDate, "/"),
 					multiplyRate: item.value
-				}
+				},
+				{
+			        headers: {
+			            'C-TOKEN': this.user.token
+			        }
+			    }
 			).then(res => {
 				this.hideLoding();
 				if(res.data.status == 1) {
@@ -528,9 +582,13 @@ new Vue({
 			this.showLoding();
 			this.$axios.post('/user/updatePostSalary',
 				{
-					userId: this.user.id,
 					postSalary: this.salaryConf.postSalary
-				}
+				},
+				{
+			        headers: {
+			            'C-TOKEN': this.user.token
+			        }
+			    }
 			).then(res => {
 				this.hideLoding();
 				if(res.data.status == 1) {
