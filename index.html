@@ -17,12 +17,12 @@
 
 	<!-- 日历 -->
 
-	<div v-if="showCalendar">
+	<div v-if="calendar.show">
 		<van-calendar
 			:show-title="false"
 			:poppable="false"
 			:show-confirm="false"
-			:min-date="minDate"
+			:min-date="calendar.minDate"
 			:row-height="52"
 			:style="{ height: '450px' }"
 			color="linear-gradient(135deg, rgba(5, 201, 221, 1) 0%, rgba(23, 196, 160, 1) 100%)"
@@ -47,7 +47,7 @@
 	<div :style="{'background-color': '#FFF'}">
 		<!-- 打卡按钮 -->
 		<van-grid :border="false" :column-num="3" :gutter="10" :clickable="true" :square="true" :center="true">
-		  <van-grid-item>
+		  <van-grid-item @click="toolBoxClick">
 		  	<van-image src="img/morning.png"/>
 		  </van-grid-item>
 		  <van-grid-item @click="punchClick">
@@ -65,15 +65,16 @@
 	</div>
 
 	<div>
-		<van-steps direction="vertical" :active="2">
+		<van-steps direction="vertical" :active="2" v-show="detail.show">
 		  <van-step>
-		    <h3>【开始时间】12:40</h3>
+		    <h3>【开始时间】{{detail.startTime}}</h3>
 		  </van-step>
 		  <van-step>
-		    <h3>【结束时间】12:40</h3>
+		    <h3>【结束时间】{{detail.endTime}}</h3>
 		  </van-step>
 		  <van-step>
-		    <h3>【加班结算】时长：1小时  加班费：￥30</h3>
+		    <h3>【加班结算】</h3>
+		    <p>时长:{{detail.overtimeDuration}}小时&nbsp;&nbsp;&nbsp;倍率:{{detail.multiplyRate}}倍&nbsp;&nbsp;&nbsp;加班费:￥{{detail.overtimePay}}</p>
 		  </van-step>
 		</van-steps>
 	</div>
@@ -118,6 +119,52 @@
 		/>
 	</van-popup>
 
+	<!-- 调整开始时间弹出层 -->
+	<van-popup v-model="startConf.show" round position="bottom" :style="{'height':'50%'}">
+		<van-datetime-picker
+		  v-model="startConf.timeSelect"
+		  type="time"
+		  :title="startConf.title"
+		  @confirm="startConfConfirm"
+		  @cancel="startConf.show = false"
+		/>
+	</van-popup>
+
+	<!-- 倍率调整弹出层 -->
+	<van-popup v-model="rateAction.show" round position="bottom" :style="{'height':'30%'}">
+		<van-picker
+			show-toolbar
+			:columns="rateAction.columns"
+			value-key="name"
+			:default-index="rateAction.defaultIndex"
+			@cancel="rateAction.show = false"
+			@confirm="rateActionConfirm"
+		/>
+	</van-popup>
+
+	<!-- 岗位工资弹出层 -->
+	<van-dialog v-model="salaryConf.show" title="岗位薪资" show-cancel-button @confirm="salaryConfirm">
+	  <van-field 
+	  	v-model="salaryConf.postSalary" 
+	  	type="number" 
+	  	label="金额" 
+	  	placeholder="请输入薪资金额"
+	  	size="large"
+	  	label-align="center"
+	  	label-width="5em"
+	  	input-align="right"
+	  	clearable 
+	  	clickable />
+	</van-dialog>
+
+	<!-- 工具盒子面板 -->
+	<van-action-sheet 
+		v-model="toolBox.show" 
+		description="设置"
+		cancel-text="取消"
+		:actions="toolBox.actions" 
+		@select="toolBoxSelect" />
+
 	<!-- 加载动画 -->
 	<van-overlay :show="lodingStatus">
 		<div class="loading-wrapper">
@@ -127,7 +174,7 @@
 
 </div>
 
-<script src="js/calendar/resize.js" type="text/javascript" charset="utf-8"></script>
+<!-- <script src="js/calendar/resize.js" type="text/javascript" charset="utf-8"></script> -->
 <script src="js/vue/vue.js" type="text/javascript" charset="utf-8"></script>
 <script src="js/vant/vant.min.js"></script>
 <script src="js/axios/axios.min.js"></script>
