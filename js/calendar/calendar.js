@@ -227,6 +227,7 @@ new Vue({
 			).then(res => {
 				if(res.data.status == 1) {
 					this.user.id = res.data.body.userId
+					this.user.token = res.data.body.token
 					this.user.postSalary = res.data.body.postSalary
 					window.localStorage.setItem("authToken", res.data.body.token);
 					this.showAuthPopup = false;
