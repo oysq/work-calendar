@@ -127,10 +127,13 @@ new Vue({
 			this.showLoding();
 			this.user.token = window.localStorage.getItem('authToken')
 			if (!this.user.token) {
-				this.hideLoding();
-				this.$toast.fail("需要登录一下哦");
-				this.showAuthPopup = true
-				return
+				this.user.token = this.getCookie("authToken")
+				if(!this.user.token) {
+					this.hideLoding();
+					this.$toast.fail("需要登录一下哦");
+					this.showAuthPopup = true
+					return
+				}
 			}
 			this.$axios.post('/user/checkToken', 
 					{
@@ -226,10 +229,15 @@ new Vue({
 				}
 			).then(res => {
 				if(res.data.status == 1) {
+
 					this.user.id = res.data.body.userId
 					this.user.token = res.data.body.token
 					this.user.postSalary = res.data.body.postSalary
+
+					// 存储
 					window.localStorage.setItem("authToken", res.data.body.token);
+					this.setCookie("authToken", res.data.body.token, 7);
+
 					this.showAuthPopup = false;
 					this.$notify({ type: 'success', message: "身份验证通过，欢迎 " + res.data.body.userName});
 					// 加载数据
@@ -659,8 +667,24 @@ new Vue({
 		    }else{
 		        return false;
 		    }
+		},
+		// cookie
+		setCookie(cname, cvalue, exdays) {
+			var d = new Date();
+			console.log(d)
+			d.setTime(d.getTime()+(exdays*24*60*60*1000));
+			var expires = "expires="+d.toGMTString();
+			document.cookie = cname + "=" + cvalue + "; " + expires;
+		},
+		getCookie(cname) {
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for(var i=0; i<ca.length; i++) {
+				var c = ca[i].trim();
+				if (c.indexOf(name)==0) return c.substring(name.length,c.length);
+			}
+			return "";
 		}
-
 	}
 });
 
